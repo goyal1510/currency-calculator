@@ -292,16 +292,16 @@
   }
 
   .app-title {
-    font-size: 14px;
+    font-size: 18px;
   }
 
   .history-button {
-    font-size: 12px;
+    font-size: 16px;
     padding: 8px;
   }
 
   .denomination-group {
-    padding: 5px;
+    padding: 8px;
   }
 
   .denomination-input,
