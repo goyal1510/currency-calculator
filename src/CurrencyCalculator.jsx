@@ -23,11 +23,12 @@ const getISTDateTime = () => {
     second: '2-digit',
     hour12: false
   };
-  return now.toLocaleString('en-IN', options);
+  // Remove the comma and any extra spaces from the formatted date
+  return now.toLocaleString('en-IN', options).replace(/,\s*/g, ' ').trim();
 };
 
 export default function CurrencyCalculator() {
-  const [counts, setCounts] = useState(Object.fromEntries([].concat(...denominationGroups).map(d => [d, 0])));
+  const [counts, setCounts] = useState(Object.fromEntries([].concat(...denominationGroups).map(d => [d, ''])));
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [dates, setDates] = useState([]);
@@ -36,7 +37,11 @@ export default function CurrencyCalculator() {
   const [entryIndex, setEntryIndex] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
 
-  const total = Object.entries(counts).reduce((sum, [d, count]) => sum + d * count, 0);
+  const total = Object.entries(counts).reduce((sum, [d, count]) => {
+    // Handle empty string or undefined values in total calculation
+    const numCount = count === '' ? 0 : parseInt(count || 0);
+    return sum + d * numCount;
+  }, 0);
 
   useEffect(() => {
     if (showHistory) {
@@ -57,7 +62,7 @@ export default function CurrencyCalculator() {
     if (entries.length > 0 && entryIndex >= 0 && entries[entryIndex]?.id) {
       fetchEntry(entries[entryIndex].id);
     } else {
-      setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, 0])));
+      setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, ''])));
     }
   }, [entryIndex, entries]);
 
@@ -137,7 +142,7 @@ export default function CurrencyCalculator() {
         return;
       }
 
-      const newCounts = Object.fromEntries([].concat(...denominationGroups).map(d => [d, 0]));
+      const newCounts = Object.fromEntries([].concat(...denominationGroups).map(d => [d, '']));
       if (data) {
         data.forEach(({ denomination, count }) => {
           if (denomination in newCounts) {
@@ -152,7 +157,9 @@ export default function CurrencyCalculator() {
   };
 
   const handleChange = (denomination, value) => {
-    setCounts({ ...counts, [denomination]: parseInt(value || 0) });
+    // Allow empty string or valid numbers
+    const newValue = value === '' ? '' : parseInt(value || 0);
+    setCounts({ ...counts, [denomination]: newValue });
   };
 
   const handleSave = async () => {
@@ -175,7 +182,7 @@ export default function CurrencyCalculator() {
       }
 
       const entries = [].concat(...denominationGroups)
-        .filter(d => counts[d] > 0)
+        .filter(d => counts[d] !== '')
         .map(d => ({
           calculation_id: calcData.id,
           denomination: d,
@@ -192,7 +199,7 @@ export default function CurrencyCalculator() {
       }
 
       alert("Calculation saved!");
-      setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, 0])));
+      setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, ''])));
       setNote("");
       
       if (showHistory) {
@@ -230,7 +237,7 @@ export default function CurrencyCalculator() {
                   className="denomination-input"
                 />
                 <div className="denomination-total">
-                  ₹{d * counts[d]}
+                  ₹{d * (counts[d] === '' ? 0 : counts[d])}
                 </div>
               </div>
             ))}
@@ -262,7 +269,13 @@ export default function CurrencyCalculator() {
       <div className="mode-switch">
         <button 
           className="history-button"
-          onClick={() => setShowHistory(false)}
+          onClick={() => {
+            setShowHistory(false);
+            // Reset all counts to empty string
+            setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, ''])));
+            // Reset note
+            setNote("");
+          }}
         >
           New
         </button>
@@ -272,8 +285,8 @@ export default function CurrencyCalculator() {
         <div className="date-nav">
           <button
             className="nav-button"
-            onClick={() => setDateIndex(Math.max(dateIndex - 1, 0))}
-            disabled={dateIndex <= 0}
+            onClick={() => setDateIndex(Math.min(dateIndex + 1, dates.length - 1))}
+            disabled={dateIndex >= dates.length - 1}
           >
             ←
           </button>
@@ -282,8 +295,8 @@ export default function CurrencyCalculator() {
           </span>
           <button
             className="nav-button"
-            onClick={() => setDateIndex(Math.min(dateIndex + 1, dates.length - 1))}
-            disabled={dateIndex >= dates.length - 1}
+            onClick={() => setDateIndex(Math.max(dateIndex - 1, 0))}
+            disabled={dateIndex <= 0}
           >
             →
           </button>
@@ -292,8 +305,8 @@ export default function CurrencyCalculator() {
         <div className="entry-nav">
           <button
             className="nav-button"
-            onClick={() => setEntryIndex(Math.max(entryIndex - 1, 0))}
-            disabled={entryIndex <= 0}
+            onClick={() => setEntryIndex(Math.min(entryIndex + 1, entries.length - 1))}
+            disabled={entryIndex >= entries.length - 1}
           >
             ↑
           </button>
@@ -309,8 +322,8 @@ export default function CurrencyCalculator() {
           </div>
           <button
             className="nav-button"
-            onClick={() => setEntryIndex(Math.min(entryIndex + 1, entries.length - 1))}
-            disabled={entryIndex >= entries.length - 1}
+            onClick={() => setEntryIndex(Math.max(entryIndex - 1, 0))}
+            disabled={entryIndex <= 0}
           >
             ↓
           </button>
@@ -325,7 +338,7 @@ export default function CurrencyCalculator() {
                 <label className="denomination-label">₹{d}</label>
                 <div className="denomination-count">{counts[d]}</div>
                 <div className="denomination-total">
-                  ₹{d * counts[d]}
+                  ₹{d * (counts[d] === '' ? 0 : counts[d])}
                 </div>
               </div>
             ))}

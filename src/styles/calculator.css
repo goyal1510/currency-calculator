@@ -15,9 +15,9 @@
 
 .calculator-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 6px;
+  padding: 12px;
   min-height: fit-content;
   display: flex;
   flex-direction: column;
@@ -34,12 +34,12 @@
   background: #4f46e5;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 12px;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  min-width: 50px;
+  min-width: 80px;
   text-align: center;
 }
 
@@ -56,17 +56,17 @@
 
 .date-nav, .entry-nav {
   background: #f8fafc;
-  border-radius: 4px;
-  padding: 4px;
+  border-radius: 6px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 4px;
-  height: 28px;
+  gap: 8px;
+  height: 40px;
 }
 
 .date-display {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 600;
   color: #1e293b;
   text-align: center;
@@ -82,13 +82,13 @@
 }
 
 .entry-time {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   color: #4f46e5;
 }
 
 .entry-note {
-  font-size: 11px;
+  font-size: 14px;
   color: #4b5563;
   white-space: nowrap;
   overflow: hidden;
@@ -98,13 +98,13 @@
 }
 
 .nav-button {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: none;
   background: white;
   color: #4f46e5;
-  font-size: 14px;
+  font-size: 18px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -128,33 +128,33 @@
 
 .denomination-group {
   background: #f8fafc;
-  border-radius: 4px;
-  padding: 4px;
+  border-radius: 8px;
+  padding: 10px;
 }
 
 .denomination-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 0;
-  height: 28px;
+  gap: 8px;
+  padding: 4px 0;
+  height: 40px;
 }
 
 .denomination-label {
-  width: 32px;
-  font-size: 12px;
+  width: 45px;
+  font-size: 16px;
   font-weight: 600;
   color: #4b5563;
 }
 
 .denomination-input {
-  width: 52px;
-  padding: 2px 4px;
+  width: 70px;
+  padding: 8px 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 4px;
+  border-radius: 6px;
   text-align: right;
-  font-size: 13px;
-  height: 24px;
+  font-size: 16px;
+  height: 36px;
 }
 
 .denomination-input:focus {
@@ -164,14 +164,14 @@
 }
 
 .denomination-count {
-  width: 52px;
-  padding: 2px 4px;
+  width: 70px;
+  padding: 8px 12px;
   background: white;
-  border-radius: 4px;
+  border-radius: 6px;
   text-align: right;
-  font-size: 13px;
+  font-size: 16px;
   color: #4b5563;
-  height: 24px;
+  height: 36px;
   line-height: 20px;
 }
 
@@ -179,8 +179,8 @@
   flex: 1;
   text-align: right;
   color: #64748b;
-  font-size: 12px;
-  padding-right: 4px;
+  font-size: 16px;
+  padding-right: 8px;
 }
 
 .bottom-container {
@@ -191,11 +191,11 @@
 
 .note-input {
   width: 100%;
-  padding: 4px;
+  padding: 8px 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  font-size: 12px;
-  height: 28px;
+  border-radius: 6px;
+  font-size: 16px;
+  height: 40px;
 }
 
 .note-input:focus {
@@ -205,15 +205,15 @@
 }
 
 .total-amount {
-  font-size: 13px;
+  font-size: 18px;
   font-weight: bold;
   color: #1e293b;
   text-align: right;
-  padding: 4px 8px;
+  padding: 8px 12px;
   background: #f8fafc;
-  border-radius: 4px;
-  height: 24px;
-  line-height: 16px;
+  border-radius: 6px;
+  height: 40px;
+  line-height: 24px;
 }
 
 .history-total {
@@ -221,15 +221,15 @@
 }
 
 .save-button {
-  padding: 4px;
+  padding: 10px;
   background: #4f46e5;
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 6px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  height: 28px;
+  height: 40px;
   width: 100%;
 }
 
@@ -242,32 +242,52 @@
   cursor: not-allowed;
 }
 
-/* Specific adjustments for Redmi Note 8 Pro */
+/* Mobile-specific adjustments */
 @media screen and (max-width: 1080px) {
   .calculator-card {
-    padding: 6px 4px;
+    padding: 12px 8px;
   }
 
   .denomination-row {
-    height: 32px;
+    height: 48px;
   }
 
   .denomination-input,
   .denomination-count {
-    height: 28px;
+    height: 40px;
+    font-size: 18px;
   }
 
   .note-input,
   .save-button {
-    height: 32px;
+    height: 48px;
+    font-size: 18px;
   }
 
-  /* Ensure text is readable on the high-density screen */
+  /* Ensure text is readable on mobile screens */
   .denomination-label,
   .denomination-total,
   .entry-note,
   .entry-time,
   .date-display {
-    font-size: 13px;
+    font-size: 16px;
+  }
+
+  /* Increase spacing between groups */
+  .denominations-container {
+    gap: 8px;
+  }
+
+  /* Larger touch targets for buttons */
+  .nav-button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  /* Increase padding for better touch areas */
+  .denomination-group {
+    padding: 12px;
+    margin-bottom: 8px;
   }
 } 
