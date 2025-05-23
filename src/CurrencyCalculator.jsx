@@ -214,6 +214,7 @@ export default function CurrencyCalculator() {
 
   const renderCalculator = () => (
     <div className="calculator-card">
+      <div className="app-title">Cash Counter</div>
       <div className="mode-switch">
         <button 
           className="history-button"
@@ -252,7 +253,10 @@ export default function CurrencyCalculator() {
           onChange={(e) => setNote(e.target.value)}
           className="note-input"
         />
-        <div className="total-amount">₹{total}</div>
+        <div className="total-amount">
+          <span className="total-label">Total:</span>
+          <span className="total-value">₹{total}</span>
+        </div>
         <button
           onClick={handleSave}
           disabled={loading}
@@ -266,6 +270,7 @@ export default function CurrencyCalculator() {
 
   const renderHistory = () => (
     <div className="calculator-card">
+      <div className="app-title">Cash Counter</div>
       <div className="mode-switch">
         <button 
           className="history-button"
@@ -308,7 +313,7 @@ export default function CurrencyCalculator() {
             onClick={() => setEntryIndex(Math.min(entryIndex + 1, entries.length - 1))}
             disabled={entryIndex >= entries.length - 1}
           >
-            ↑
+            ←
           </button>
           <div className="entry-info">
             <div className="entry-time">
@@ -325,7 +330,7 @@ export default function CurrencyCalculator() {
             onClick={() => setEntryIndex(Math.max(entryIndex - 1, 0))}
             disabled={entryIndex <= 0}
           >
-            ↓
+            →
           </button>
         </div>
       </div>
@@ -346,7 +351,10 @@ export default function CurrencyCalculator() {
         ))}
       </div>
 
-      <div className="total-amount history-total">₹{total}</div>
+      <div className="total-amount history-total">
+        <span className="total-label">Total:</span>
+        <span className="total-value">₹{total}</span>
+      </div>
     </div>
   );
 
