@@ -11,24 +11,19 @@ const denominationGroups = [
   [100, 200, 500]
 ];
 
-const formatDateTime = (timestamp) => {
-  const date = new Date(timestamp);
-  return {
-    date: date.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: '2-digit'
-    }),
-    time: date.toLocaleTimeString('en-IN', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    })
+const getISTDateTime = () => {
+  const now = new Date();
+  const options = { 
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
   };
-};
-
-const getDateString = (timestamp) => {
-  return new Date(timestamp).toISOString().split('T')[0];
+  return now.toLocaleString('en-IN', options);
 };
 
 export default function CurrencyCalculator() {
@@ -70,7 +65,7 @@ export default function CurrencyCalculator() {
     try {
       const { data, error } = await supabase
         .from("calculations")
-        .select("created_at")
+        .select("ist_timestamp")
         .order("created_at", { ascending: false });
       
       if (error) {
@@ -84,9 +79,15 @@ export default function CurrencyCalculator() {
         return;
       }
 
-      const uniqueDates = [...new Set(data.map(d => getDateString(d.created_at)))];
+
+
+      const uniqueDates = [...new Set(data
+        .filter(d => d.ist_timestamp) // Filter out null/undefined timestamps
+        .map(d => d.ist_timestamp.split(' ')[0]) // Get just the date part
+      )];
+      
       setDates(uniqueDates);
-      setDateIndex(0);
+      setDateIndex(uniqueDates.length > 0 ? 0 : -1);
     } catch (err) {
       console.error("Unexpected error in fetchDates:", err);
     }
@@ -96,17 +97,18 @@ export default function CurrencyCalculator() {
     if (!selectedDate) return;
 
     try {
+
       const { data, error } = await supabase
         .from("calculations")
-        .select("id, note, created_at")
-        .gte("created_at", selectedDate)
-        .lt("created_at", new Date(new Date(selectedDate).getTime() + 24*60*60*1000).toISOString())
+        .select("id, note, created_at, ist_timestamp")
+        .ilike('ist_timestamp', `${selectedDate}%`)
         .order("created_at", { ascending: false });
       
       if (error) {
         console.error("Error fetching entries:", error);
         return;
       }
+
 
       if (!data || data.length === 0) {
         setEntries([]);
@@ -156,9 +158,14 @@ export default function CurrencyCalculator() {
   const handleSave = async () => {
     setLoading(true);
     try {
+      const istDateTime = getISTDateTime();
+
       const { data: calcData, error: calcError } = await supabase
         .from("calculations")
-        .insert([{ note }])
+        .insert([{ 
+          note,
+          ist_timestamp: istDateTime
+        }])
         .select()
         .single();
 
@@ -271,7 +278,7 @@ export default function CurrencyCalculator() {
             ←
           </button>
           <span className="date-display">
-            {dates[dateIndex] ? formatDateTime(dates[dateIndex]).date : "No Data"}
+            {dates[dateIndex] || "No Data"}
           </span>
           <button
             className="nav-button"
@@ -292,7 +299,9 @@ export default function CurrencyCalculator() {
           </button>
           <div className="entry-info">
             <div className="entry-time">
-              {entries[entryIndex] ? formatDateTime(entries[entryIndex].created_at).time : ""}
+              {entries[entryIndex]?.ist_timestamp ? 
+                entries[entryIndex].ist_timestamp.split(' ')[1] :
+                ""}
             </div>
             <div className="entry-note">
               {entries[entryIndex]?.note || "-"}
