@@ -214,8 +214,8 @@ export default function CurrencyCalculator() {
 
   const renderCalculator = () => (
     <div className="calculator-card">
-      <div className="app-title">Cash Counter</div>
-      <div className="mode-switch">
+      <div className="header">
+        <div className="app-title">Cash Counter</div>
         <button 
           className="history-button"
           onClick={() => setShowHistory(true)}
@@ -270,15 +270,13 @@ export default function CurrencyCalculator() {
 
   const renderHistory = () => (
     <div className="calculator-card">
-      <div className="app-title">Cash Counter</div>
-      <div className="mode-switch">
+      <div className="header">
+        <div className="app-title">Cash Counter</div>
         <button 
           className="history-button"
           onClick={() => {
             setShowHistory(false);
-            // Reset all counts to empty string
             setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, ''])));
-            // Reset note
             setNote("");
           }}
         >
