@@ -1,7 +1,7 @@
 .calculator-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #f0f4ff 0%, #e6eeff 100%);
-  padding: 6px;
+  padding: 4px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -15,18 +15,19 @@
 
 .calculator-card {
   background: white;
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 10px 8px;
-  height: calc(100vh - 12px);
+  padding: 6px;
+  min-height: fit-content;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
 }
 
 .mode-switch {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .history-button {
@@ -49,19 +50,19 @@
 .history-navigation {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 4px;
+  margin-bottom: 4px;
 }
 
 .date-nav, .entry-nav {
   background: #f8fafc;
   border-radius: 4px;
-  padding: 4px 6px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  height: 32px;
+  gap: 4px;
+  height: 28px;
 }
 
 .date-display {
@@ -77,8 +78,7 @@
   text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 2px;
+  gap: 1px;
 }
 
 .entry-time {
@@ -98,13 +98,13 @@
 }
 
 .nav-button {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: none;
   background: white;
   color: #4f46e5;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -119,27 +119,25 @@
 }
 
 .denominations-container {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  overflow-y: auto;
-  padding: 2px;
-  margin: 4px 0;
+  gap: 4px;
+  padding: 0;
+  margin-bottom: 4px;
 }
 
 .denomination-group {
   background: #f8fafc;
   border-radius: 4px;
-  padding: 6px;
+  padding: 4px;
 }
 
 .denomination-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 0;
-  height: 32px;
+  gap: 4px;
+  padding: 2px 0;
+  height: 28px;
 }
 
 .denomination-label {
@@ -150,13 +148,13 @@
 }
 
 .denomination-input {
-  width: 55px;
-  padding: 4px;
+  width: 52px;
+  padding: 2px 4px;
   border: 1px solid #e2e8f0;
   border-radius: 4px;
   text-align: right;
   font-size: 13px;
-  height: 28px;
+  height: 24px;
 }
 
 .denomination-input:focus {
@@ -166,14 +164,14 @@
 }
 
 .denomination-count {
-  width: 55px;
-  padding: 4px;
+  width: 52px;
+  padding: 2px 4px;
   background: white;
   border-radius: 4px;
   text-align: right;
   font-size: 13px;
   color: #4b5563;
-  height: 28px;
+  height: 24px;
   line-height: 20px;
 }
 
@@ -186,21 +184,18 @@
 }
 
 .bottom-container {
-  margin-top: 6px;
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 6px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .note-input {
-  grid-column: 1 / -1;
   width: 100%;
-  padding: 6px;
+  padding: 4px;
   border: 1px solid #e2e8f0;
   border-radius: 4px;
   font-size: 12px;
-  height: 32px;
+  height: 28px;
 }
 
 .note-input:focus {
@@ -217,17 +212,16 @@
   padding: 4px 8px;
   background: #f8fafc;
   border-radius: 4px;
-  height: 28px;
-  line-height: 20px;
-  min-width: 80px;
+  height: 24px;
+  line-height: 16px;
 }
 
 .history-total {
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .save-button {
-  padding: 4px 12px;
+  padding: 4px;
   background: #4f46e5;
   color: white;
   border: none;
@@ -236,7 +230,7 @@
   font-weight: 600;
   cursor: pointer;
   height: 28px;
-  min-width: 50px;
+  width: 100%;
 }
 
 .save-button:hover:not(:disabled) {
@@ -251,22 +245,21 @@
 /* Specific adjustments for Redmi Note 8 Pro */
 @media screen and (max-width: 1080px) {
   .calculator-card {
-    padding: 8px 6px;
+    padding: 6px 4px;
   }
 
   .denomination-row {
-    height: 36px; /* Slightly larger touch target */
+    height: 32px;
   }
 
   .denomination-input,
-  .denomination-count,
-  .save-button,
-  .total-amount {
-    height: 32px; /* Slightly larger touch target */
+  .denomination-count {
+    height: 28px;
   }
 
-  .note-input {
-    height: 36px; /* Slightly larger touch target */
+  .note-input,
+  .save-button {
+    height: 32px;
   }
 
   /* Ensure text is readable on the high-density screen */
