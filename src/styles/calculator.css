@@ -1,6 +1,6 @@
 .calculator-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f4ff 0%, #e6eeff 100%);
+  background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
   padding: 4px;
   display: flex;
   align-items: flex-start;
@@ -14,14 +14,18 @@
 }
 
 .calculator-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   padding: 2px;
   min-height: fit-content;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  backdrop-filter: blur(10px);
 }
 
 .header {
@@ -29,14 +33,19 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
-  padding-bottom: 6px;
-  border-bottom: 2px solid #e2e8f0;
+  padding: 12px 16px 6px;
+  border-bottom: 2px solid rgba(79, 70, 229, 0.1);
+  background: linear-gradient(to right, rgba(79, 70, 229, 0.05), transparent);
+  border-radius: 16px 16px 0 0;
 }
 
 .app-title {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 700;
-  color: #4f46e5;
+  background: linear-gradient(45deg, #4f46e5, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .mode-switch {
@@ -46,20 +55,24 @@
 }
 
 .history-button {
-  background: #4f46e5;
+  background: linear-gradient(45deg, #4f46e5, #6366f1);
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 8px;
-  font-size: 12px;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   min-width: 80px;
   text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
 }
 
 .history-button:hover {
-  background: #4338ca;
+  background: linear-gradient(45deg, #4338ca, #4f46e5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
 }
 
 .history-navigation {
@@ -146,66 +159,122 @@
 .denominations-container {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 0;
+  gap: 8px;
+  padding: 8px;
   margin-bottom: 4px;
-}
-
-.denomination-group {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 5px;
 }
 
 .denomination-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 0;
-  height: 40px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.denomination-row.empty-value {
+  background: linear-gradient(to right, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.02));
+  border: 1px solid rgba(239, 68, 68, 0.1);
+}
+
+.denomination-row.has-value {
+  background: linear-gradient(to right, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0.02));
+  border: 1px solid rgba(34, 197, 94, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 2px 4px rgba(34, 197, 94, 0.1),
+    0 0 0 1px rgba(34, 197, 94, 0.1);
 }
 
 .denomination-label {
   width: 45px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #4b5563;
+  transition: all 0.3s ease;
+}
+
+.empty-value .denomination-label {
+  color: #ef4444;
+  text-shadow: 0 0 1px rgba(239, 68, 68, 0.2);
+}
+
+.has-value .denomination-label {
+  color: #22c55e;
+  text-shadow: 0 0 1px rgba(34, 197, 94, 0.2);
 }
 
 .denomination-input {
   width: 70px;
   padding: 8px 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 8px;
   text-align: right;
   font-size: 14px;
   height: 36px;
+  transition: all 0.3s ease;
+  background: white;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.empty-value .denomination-input {
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.has-value .denomination-input {
+  border-color: rgba(34, 197, 94, 0.2);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .denomination-input:focus {
   outline: none;
   border-color: #4f46e5;
-  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.1);
+  box-shadow: 
+    0 0 0 3px rgba(79, 70, 229, 0.1),
+    inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .denomination-count {
   width: 70px;
   padding: 8px 12px;
   background: white;
-  border-radius: 6px;
+  border-radius: 8px;
   text-align: right;
-  font-size: 16px;
-  color: #4b5563;
+  font-size: 14px;
   height: 36px;
   line-height: 20px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.empty-value .denomination-count {
+  color: #ef4444;
+}
+
+.has-value .denomination-count {
+  color: #22c55e;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .denomination-total {
   flex: 1;
   text-align: right;
-  color: #64748b;
-  font-size: 16px;
-  padding-right: 8px;
+  padding-right: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.empty-value .denomination-total {
+  color: #ef4444;
+  opacity: 0.7;
+}
+
+.has-value .denomination-total {
+  color: #22c55e;
+  text-shadow: 0 0 1px rgba(34, 197, 94, 0.2);
 }
 
 .bottom-container {
@@ -216,17 +285,21 @@
 
 .note-input {
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 16px;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 16px;
+  border-radius: 8px;
+  font-size: 14px;
   height: 40px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .note-input:focus {
   outline: none;
   border-color: #4f46e5;
-  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.1);
+  box-shadow: 
+    0 0 0 3px rgba(79, 70, 229, 0.1),
+    inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .total-amount {
@@ -234,15 +307,15 @@
   font-weight: bold;
   color: #1e293b;
   text-align: right;
-  padding: 8px 12px;
-  background: #f8fafc;
-  border-radius: 6px;
-  height: 40px;
-  line-height: 24px;
+  padding: 12px 16px;
+  background: linear-gradient(to right, transparent, rgba(79, 70, 229, 0.05));
+  border-radius: 8px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .total-label {
@@ -251,7 +324,10 @@
 }
 
 .total-value {
-  color: #1e293b;
+  color: #4f46e5;
+  background: linear-gradient(45deg, #4f46e5, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .history-total {
@@ -300,17 +376,13 @@
     padding: 8px;
   }
 
-  .denomination-group {
-    padding: 8px;
+  .denomination-row {
+    padding: 8px 12px;
   }
 
   .denomination-input,
   .denomination-count {
     font-size: 14px;
-  }
-
-  .denomination-row {
-    height: 48px;
   }
 
   .note-input,
@@ -357,7 +429,7 @@
   .total-amount {
     height: 48px;
     font-size: 20px;
-    padding: 10px 16px;
+    padding: 10px 14px;
   }
 
   .total-label {

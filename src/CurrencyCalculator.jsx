@@ -4,12 +4,8 @@ import "./styles/calculator.css";
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
-// Grouped denominations for more compact display
-const denominationGroups = [
-  [1, 2, 5],
-  [10, 20, 50],
-  [100, 200, 500]
-];
+// Flatten the denominations array
+const denominations = [1, 2, 5, 10, 20, 50, 100, 200, 500];
 
 const getISTDateTime = () => {
   const now = new Date();
@@ -28,7 +24,7 @@ const getISTDateTime = () => {
 };
 
 export default function CurrencyCalculator() {
-  const [counts, setCounts] = useState(Object.fromEntries([].concat(...denominationGroups).map(d => [d, ''])));
+  const [counts, setCounts] = useState(Object.fromEntries(denominations.map(d => [d, ''])));
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [dates, setDates] = useState([]);
@@ -62,7 +58,7 @@ export default function CurrencyCalculator() {
     if (entries.length > 0 && entryIndex >= 0 && entries[entryIndex]?.id) {
       fetchEntry(entries[entryIndex].id);
     } else {
-      setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, ''])));
+      setCounts(Object.fromEntries(denominations.map(d => [d, ''])));
     }
   }, [entryIndex, entries]);
 
@@ -142,7 +138,7 @@ export default function CurrencyCalculator() {
         return;
       }
 
-      const newCounts = Object.fromEntries([].concat(...denominationGroups).map(d => [d, '']));
+      const newCounts = Object.fromEntries(denominations.map(d => [d, '']));
       if (data) {
         data.forEach(({ denomination, count }) => {
           if (denomination in newCounts) {
@@ -181,7 +177,7 @@ export default function CurrencyCalculator() {
         return;
       }
 
-      const entries = [].concat(...denominationGroups)
+      const entries = denominations
         .filter(d => counts[d] !== '')
         .map(d => ({
           calculation_id: calcData.id,
@@ -199,7 +195,7 @@ export default function CurrencyCalculator() {
       }
 
       alert("Calculation saved!");
-      setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, ''])));
+      setCounts(Object.fromEntries(denominations.map(d => [d, ''])));
       setNote("");
       
       if (showHistory) {
@@ -225,23 +221,20 @@ export default function CurrencyCalculator() {
       </div>
 
       <div className="denominations-container">
-        {denominationGroups.map((group, groupIndex) => (
-          <div key={groupIndex} className="denomination-group">
-            {group.map(d => (
-              <div key={d} className="denomination-row">
-                <label className="denomination-label">₹{d}</label>
-                <input
-                  type="number"
-                  value={counts[d]}
-                  min="0"
-                  onChange={(e) => handleChange(d, e.target.value)}
-                  className="denomination-input"
-                />
-                <div className="denomination-total">
-                  ₹{d * (counts[d] === '' ? 0 : counts[d])}
-                </div>
-              </div>
-            ))}
+        {denominations.map(d => (
+          <div key={d} className={`denomination-row ${counts[d] ? 'has-value' : 'empty-value'}`}>
+            <label className="denomination-label">₹{d}</label>
+            <input
+              type="number"
+              value={counts[d]}
+              min="0"
+              onChange={(e) => handleChange(d, e.target.value)}
+              className="denomination-input"
+              placeholder="0"
+            />
+            <div className="denomination-total">
+              ₹{d * (counts[d] === '' ? 0 : counts[d])}
+            </div>
           </div>
         ))}
       </div>
@@ -276,7 +269,7 @@ export default function CurrencyCalculator() {
           className="history-button"
           onClick={() => {
             setShowHistory(false);
-            setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, ''])));
+            setCounts(Object.fromEntries(denominations.map(d => [d, ''])));
             setNote("");
           }}
         >
@@ -334,17 +327,13 @@ export default function CurrencyCalculator() {
       </div>
 
       <div className="denominations-container">
-        {denominationGroups.map((group, groupIndex) => (
-          <div key={groupIndex} className="denomination-group">
-            {group.map(d => (
-              <div key={d} className="denomination-row">
-                <label className="denomination-label">₹{d}</label>
-                <div className="denomination-count">{counts[d]}</div>
-                <div className="denomination-total">
-                  ₹{d * (counts[d] === '' ? 0 : counts[d])}
-                </div>
-              </div>
-            ))}
+        {denominations.map(d => (
+          <div key={d} className={`denomination-row ${counts[d] ? 'has-value' : 'empty-value'}`}>
+            <label className="denomination-label">₹{d}</label>
+            <div className="denomination-count">{counts[d]}</div>
+            <div className="denomination-total">
+              ₹{d * (counts[d] === '' ? 0 : counts[d])}
+            </div>
           </div>
         ))}
       </div>
