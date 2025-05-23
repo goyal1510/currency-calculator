@@ -1,0 +1,338 @@
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import "./styles/calculator.css";
+
+const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+// Grouped denominations for more compact display
+const denominationGroups = [
+  [1, 2, 5],
+  [10, 20, 50],
+  [100, 200, 500]
+];
+
+const formatDateTime = (timestamp) => {
+  const date = new Date(timestamp);
+  return {
+    date: date.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: '2-digit'
+    }),
+    time: date.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+  };
+};
+
+const getDateString = (timestamp) => {
+  return new Date(timestamp).toISOString().split('T')[0];
+};
+
+export default function CurrencyCalculator() {
+  const [counts, setCounts] = useState(Object.fromEntries([].concat(...denominationGroups).map(d => [d, 0])));
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [dates, setDates] = useState([]);
+  const [dateIndex, setDateIndex] = useState(0);
+  const [entries, setEntries] = useState([]);
+  const [entryIndex, setEntryIndex] = useState(0);
+  const [showHistory, setShowHistory] = useState(false);
+
+  const total = Object.entries(counts).reduce((sum, [d, count]) => sum + d * count, 0);
+
+  useEffect(() => {
+    if (showHistory) {
+      fetchDates();
+    }
+  }, [showHistory]);
+
+  useEffect(() => {
+    if (dates.length > 0 && dateIndex >= 0) {
+      fetchEntries(dates[dateIndex]);
+    } else {
+      setEntries([]);
+      setEntryIndex(-1);
+    }
+  }, [dates, dateIndex]);
+
+  useEffect(() => {
+    if (entries.length > 0 && entryIndex >= 0 && entries[entryIndex]?.id) {
+      fetchEntry(entries[entryIndex].id);
+    } else {
+      setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, 0])));
+    }
+  }, [entryIndex, entries]);
+
+  const fetchDates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("calculations")
+        .select("created_at")
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching dates:", error);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        setDates([]);
+        setDateIndex(-1);
+        return;
+      }
+
+      const uniqueDates = [...new Set(data.map(d => getDateString(d.created_at)))];
+      setDates(uniqueDates);
+      setDateIndex(0);
+    } catch (err) {
+      console.error("Unexpected error in fetchDates:", err);
+    }
+  };
+
+  const fetchEntries = async (selectedDate) => {
+    if (!selectedDate) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("calculations")
+        .select("id, note, created_at")
+        .gte("created_at", selectedDate)
+        .lt("created_at", new Date(new Date(selectedDate).getTime() + 24*60*60*1000).toISOString())
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching entries:", error);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        setEntries([]);
+        setEntryIndex(-1);
+        return;
+      }
+      
+      setEntries(data);
+      setEntryIndex(0);
+    } catch (err) {
+      console.error("Unexpected error in fetchEntries:", err);
+    }
+  };
+
+  const fetchEntry = async (id) => {
+    if (!id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("denominations")
+        .select("denomination, count")
+        .eq("calculation_id", id);
+      
+      if (error) {
+        console.error("Error fetching entry:", error);
+        return;
+      }
+
+      const newCounts = Object.fromEntries([].concat(...denominationGroups).map(d => [d, 0]));
+      if (data) {
+        data.forEach(({ denomination, count }) => {
+          if (denomination in newCounts) {
+            newCounts[denomination] = count;
+          }
+        });
+      }
+      setCounts(newCounts);
+    } catch (err) {
+      console.error("Unexpected error in fetchEntry:", err);
+    }
+  };
+
+  const handleChange = (denomination, value) => {
+    setCounts({ ...counts, [denomination]: parseInt(value || 0) });
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const { data: calcData, error: calcError } = await supabase
+        .from("calculations")
+        .insert([{ note }])
+        .select()
+        .single();
+
+      if (calcError) {
+        console.error("Error saving calculation:", calcError);
+        return;
+      }
+
+      const entries = [].concat(...denominationGroups)
+        .filter(d => counts[d] > 0)
+        .map(d => ({
+          calculation_id: calcData.id,
+          denomination: d,
+          count: counts[d]
+        }));
+
+      const { error: denomError } = await supabase
+        .from("denominations")
+        .insert(entries);
+
+      if (denomError) {
+        console.error("Error saving denominations:", denomError);
+        return;
+      }
+
+      alert("Calculation saved!");
+      setCounts(Object.fromEntries([].concat(...denominationGroups).map(d => [d, 0])));
+      setNote("");
+      
+      if (showHistory) {
+        fetchDates();
+      }
+    } catch (err) {
+      console.error("Unexpected error in handleSave:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderCalculator = () => (
+    <div className="calculator-card">
+      <div className="mode-switch">
+        <button 
+          className="history-button"
+          onClick={() => setShowHistory(true)}
+        >
+          History
+        </button>
+      </div>
+
+      <div className="denominations-container">
+        {denominationGroups.map((group, groupIndex) => (
+          <div key={groupIndex} className="denomination-group">
+            {group.map(d => (
+              <div key={d} className="denomination-row">
+                <label className="denomination-label">₹{d}</label>
+                <input
+                  type="number"
+                  value={counts[d]}
+                  min="0"
+                  onChange={(e) => handleChange(d, e.target.value)}
+                  className="denomination-input"
+                />
+                <div className="denomination-total">
+                  ₹{d * counts[d]}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className="bottom-container">
+        <input
+          placeholder="Note..."
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          className="note-input"
+        />
+        <div className="total-amount">₹{total}</div>
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="save-button"
+        >
+          {loading ? "..." : "Save"}
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderHistory = () => (
+    <div className="calculator-card">
+      <div className="mode-switch">
+        <button 
+          className="history-button"
+          onClick={() => setShowHistory(false)}
+        >
+          New
+        </button>
+      </div>
+
+      <div className="history-navigation">
+        <div className="date-nav">
+          <button
+            className="nav-button"
+            onClick={() => setDateIndex(Math.max(dateIndex - 1, 0))}
+            disabled={dateIndex <= 0}
+          >
+            ←
+          </button>
+          <span className="date-display">
+            {dates[dateIndex] ? formatDateTime(dates[dateIndex]).date : "No Data"}
+          </span>
+          <button
+            className="nav-button"
+            onClick={() => setDateIndex(Math.min(dateIndex + 1, dates.length - 1))}
+            disabled={dateIndex >= dates.length - 1}
+          >
+            →
+          </button>
+        </div>
+
+        <div className="entry-nav">
+          <button
+            className="nav-button"
+            onClick={() => setEntryIndex(Math.max(entryIndex - 1, 0))}
+            disabled={entryIndex <= 0}
+          >
+            ↑
+          </button>
+          <div className="entry-info">
+            <div className="entry-time">
+              {entries[entryIndex] ? formatDateTime(entries[entryIndex].created_at).time : ""}
+            </div>
+            <div className="entry-note">
+              {entries[entryIndex]?.note || "-"}
+            </div>
+          </div>
+          <button
+            className="nav-button"
+            onClick={() => setEntryIndex(Math.min(entryIndex + 1, entries.length - 1))}
+            disabled={entryIndex >= entries.length - 1}
+          >
+            ↓
+          </button>
+        </div>
+      </div>
+
+      <div className="denominations-container">
+        {denominationGroups.map((group, groupIndex) => (
+          <div key={groupIndex} className="denomination-group">
+            {group.map(d => (
+              <div key={d} className="denomination-row">
+                <label className="denomination-label">₹{d}</label>
+                <div className="denomination-count">{counts[d]}</div>
+                <div className="denomination-total">
+                  ₹{d * counts[d]}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className="total-amount history-total">₹{total}</div>
+    </div>
+  );
+
+  return (
+    <div className="calculator-container">
+      <div className="calculator-wrapper">
+        {showHistory ? renderHistory() : renderCalculator()}
+      </div>
+    </div>
+  );
+}

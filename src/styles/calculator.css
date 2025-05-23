@@ -1,0 +1,280 @@
+.calculator-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e6eeff 100%);
+  padding: 6px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.calculator-wrapper {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+.calculator-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px 8px;
+  height: calc(100vh - 12px);
+  display: flex;
+  flex-direction: column;
+}
+
+.mode-switch {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.history-button {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 50px;
+  text-align: center;
+}
+
+.history-button:hover {
+  background: #4338ca;
+}
+
+.history-navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.date-nav, .entry-nav {
+  background: #f8fafc;
+  border-radius: 4px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  height: 32px;
+}
+
+.date-display {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: center;
+  flex: 1;
+}
+
+.entry-info {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.entry-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4f46e5;
+}
+
+.entry-note {
+  font-size: 11px;
+  color: #4b5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.nav-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  color: #4f46e5;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.denominations-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding: 2px;
+  margin: 4px 0;
+}
+
+.denomination-group {
+  background: #f8fafc;
+  border-radius: 4px;
+  padding: 6px;
+}
+
+.denomination-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  height: 32px;
+}
+
+.denomination-label {
+  width: 32px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.denomination-input {
+  width: 55px;
+  padding: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  text-align: right;
+  font-size: 13px;
+  height: 28px;
+}
+
+.denomination-input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.1);
+}
+
+.denomination-count {
+  width: 55px;
+  padding: 4px;
+  background: white;
+  border-radius: 4px;
+  text-align: right;
+  font-size: 13px;
+  color: #4b5563;
+  height: 28px;
+  line-height: 20px;
+}
+
+.denomination-total {
+  flex: 1;
+  text-align: right;
+  color: #64748b;
+  font-size: 12px;
+  padding-right: 4px;
+}
+
+.bottom-container {
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.note-input {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 12px;
+  height: 32px;
+}
+
+.note-input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.1);
+}
+
+.total-amount {
+  font-size: 13px;
+  font-weight: bold;
+  color: #1e293b;
+  text-align: right;
+  padding: 4px 8px;
+  background: #f8fafc;
+  border-radius: 4px;
+  height: 28px;
+  line-height: 20px;
+  min-width: 80px;
+}
+
+.history-total {
+  margin-top: 6px;
+}
+
+.save-button {
+  padding: 4px 12px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  height: 28px;
+  min-width: 50px;
+}
+
+.save-button:hover:not(:disabled) {
+  background: #4338ca;
+}
+
+.save-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Specific adjustments for Redmi Note 8 Pro */
+@media screen and (max-width: 1080px) {
+  .calculator-card {
+    padding: 8px 6px;
+  }
+
+  .denomination-row {
+    height: 36px; /* Slightly larger touch target */
+  }
+
+  .denomination-input,
+  .denomination-count,
+  .save-button,
+  .total-amount {
+    height: 32px; /* Slightly larger touch target */
+  }
+
+  .note-input {
+    height: 36px; /* Slightly larger touch target */
+  }
+
+  /* Ensure text is readable on the high-density screen */
+  .denomination-label,
+  .denomination-total,
+  .entry-note,
+  .entry-time,
+  .date-display {
+    font-size: 13px;
+  }
+} 
