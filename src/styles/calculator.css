@@ -283,31 +283,34 @@
 /* Mobile-specific adjustments */
 @media screen and (max-width: 1080px) {
   .calculator-card {
-    padding: 12px 8px;
+    padding: 2px;
   }
 
   .header {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
   }
 
   .app-title {
-    font-size: 28px;
+    font-size: 14px;
   }
 
   .history-button {
-    font-size: 18px;
-    padding: 10px 20px;
+    font-size: 12px;
+    padding: 8px;
   }
 
-  .denomination-row {
-    height: 48px;
+  .denomination-group {
+    padding: 5px;
   }
 
   .denomination-input,
   .denomination-count {
-    height: 40px;
-    font-size: 18px;
+    font-size: 14px;
+  }
+
+  .denomination-row {
+    height: 48px;
   }
 
   .note-input,
@@ -335,12 +338,6 @@
     width: 40px;
     height: 40px;
     font-size: 20px;
-  }
-
-  /* Increase padding for better touch areas */
-  .denomination-group {
-    padding: 12px;
-    margin-bottom: 8px;
   }
 
   .entry-info {
