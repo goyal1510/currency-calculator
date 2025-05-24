@@ -162,23 +162,43 @@ export default function CurrencyCalculator() {
   };
 
   const handleChange = (denomination, type, value) => {
-    const newValue = value === '' ? '' : parseInt(value || 0);
+    // Allow empty string or any number (positive/negative)
+    let newValue = value;
+    if (value !== '') {
+      newValue = parseInt(value);
+      if (isNaN(newValue)) newValue = '';
+    }
+
     setCounts(prev => {
       const prevCount = prev[denomination];
-      const bundle = type === 'bundle' ? newValue : prevCount.bundle;
-      const open = type === 'open' ? newValue : prevCount.open;
-      const bundleValue = bundle === '' ? 0 : bundle * 100;
-      const openValue = open === '' ? 0 : open;
+      // Convert values to numbers for calculation, using 0 for empty strings
+      const bundleNum = type === 'bundle' ? 
+        (newValue === '' ? 0 : Number(newValue)) : 
+        (prevCount.bundle === '' ? 0 : Number(prevCount.bundle));
+      
+      const openNum = type === 'open' ? 
+        (newValue === '' ? 0 : Number(newValue)) : 
+        (prevCount.open === '' ? 0 : Number(prevCount.open));
+
+      // Calculate total using numbers
+      const bundleValue = bundleNum * 100;
+      const total = bundleValue + openNum;
       
       return {
         ...prev,
         [denomination]: {
           bundle: type === 'bundle' ? value : prevCount.bundle,
           open: type === 'open' ? value : prevCount.open,
-          total: bundleValue + openValue
+          total: total
         }
       };
     });
+  };
+
+  const getRowClassName = (count) => {
+    if (count.total === 0) return 'empty-value';
+    if (count.total < 0) return 'negative-value';
+    return 'has-value';
   };
 
   const handleSave = async () => {
@@ -209,15 +229,15 @@ export default function CurrencyCalculator() {
           return;
         }
 
-        // Insert new denominations
+        // Insert new denominations with potential negative values
         const entries = denominations
-          .filter(d => counts[d].total > 0)
+          .filter(d => counts[d].total !== 0) // Include both positive and negative totals
           .map(d => ({
             calculation_id: editingEntryId,
             denomination: d,
             count: counts[d].total,
-            bundle_count: counts[d].bundle === '' ? 0 : counts[d].bundle,
-            open_count: counts[d].open === '' ? 0 : counts[d].open
+            bundle_count: counts[d].bundle === '' ? 0 : parseInt(counts[d].bundle),
+            open_count: counts[d].open === '' ? 0 : parseInt(counts[d].open)
           }));
 
         const { error: denomError } = await supabase
@@ -250,14 +270,15 @@ export default function CurrencyCalculator() {
           return;
         }
 
+        // Insert new denominations with potential negative values
         const entries = denominations
-          .filter(d => counts[d].total > 0)
+          .filter(d => counts[d].total !== 0) // Include both positive and negative totals
           .map(d => ({
             calculation_id: calcData.id,
             denomination: d,
             count: counts[d].total,
-            bundle_count: counts[d].bundle === '' ? 0 : counts[d].bundle,
-            open_count: counts[d].open === '' ? 0 : counts[d].open
+            bundle_count: counts[d].bundle === '' ? 0 : parseInt(counts[d].bundle),
+            open_count: counts[d].open === '' ? 0 : parseInt(counts[d].open)
           }));
 
         const { error: denomError } = await supabase
@@ -380,12 +401,11 @@ export default function CurrencyCalculator() {
           <span className="header-label">Amount</span>
         </div>
         {denominations.map(d => (
-          <div key={d} className={`denomination-row ${counts[d].total > 0 ? 'has-value' : 'empty-value'}`}>
+          <div key={d} className={`denomination-row ${getRowClassName(counts[d])}`}>
             <label className="denomination-label">₹{d}</label>
             <input
               type="number"
               value={counts[d].bundle}
-              min="0"
               onChange={(e) => handleChange(d, 'bundle', e.target.value)}
               className="denomination-input"
               placeholder="0"
@@ -394,14 +414,15 @@ export default function CurrencyCalculator() {
             <input
               type="number"
               value={counts[d].open}
-              min="0"
               onChange={(e) => handleChange(d, 'open', e.target.value)}
               className="denomination-input"
               placeholder="0"
               aria-label={`Open ₹${d} notes`}
             />
-            <div className="denomination-count">{counts[d].total}</div>
-            <div className="denomination-total">
+            <div className={`denomination-count ${counts[d].total < 0 ? 'negative' : ''}`}>
+              {counts[d].total}
+            </div>
+            <div className={`denomination-total ${counts[d].total < 0 ? 'negative' : ''}`}>
               {d * counts[d].total}
             </div>
           </div>
@@ -508,12 +529,14 @@ export default function CurrencyCalculator() {
           <span className="header-label">Amount</span>
         </div>
         {denominations.map(d => (
-          <div key={d} className={`denomination-row ${counts[d].total > 0 ? 'has-value' : 'empty-value'}`}>
+          <div key={d} className={`denomination-row ${getRowClassName(counts[d])}`}>
             <label className="denomination-label">₹{d}</label>
             <div className="denomination-count">{counts[d].bundle || 0}</div>
             <div className="denomination-count">{counts[d].open || 0}</div>
-            <div className="denomination-count">{counts[d].total}</div>
-            <div className="denomination-total">
+            <div className={`denomination-count ${counts[d].total < 0 ? 'negative' : ''}`}>
+              {counts[d].total}
+            </div>
+            <div className={`denomination-total ${counts[d].total < 0 ? 'negative' : ''}`}>
               {d * counts[d].total}
             </div>
           </div>
