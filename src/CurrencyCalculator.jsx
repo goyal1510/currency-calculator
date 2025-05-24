@@ -240,12 +240,16 @@ export default function CurrencyCalculator() {
       </div>
 
       <div className="bottom-container">
-        <input
-          placeholder="Note..."
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          className="note-input"
-        />
+        <div className="note-input-container">
+          <input
+            placeholder="Add note..."
+            value={note}
+            onChange={(e) => setNote(e.target.value.slice(0, 16))}
+            maxLength={16}
+            className="note-input"
+          />
+          <span className="note-char-count">{note.length}/16</span>
+        </div>
         <div className="total-amount">
           <span className="total-label">Total:</span>
           <span className="total-value">₹{total}</span>
