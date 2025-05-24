@@ -214,6 +214,7 @@
   border-radius: 8px;
   text-align: right;
   font-size: 14px;
+  font-weight: 600;
   height: 36px;
   transition: all 0.3s ease;
   background: white;
@@ -244,6 +245,7 @@
   border-radius: 8px;
   text-align: right;
   font-size: 14px;
+  font-weight: 600;
   height: 36px;
   line-height: 20px;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -359,12 +361,12 @@
 /* Mobile-specific adjustments */
 @media screen and (max-width: 1080px) {
   .calculator-card {
-    padding: 2px;
+    padding: 1px;
   }
 
   .header {
-    margin-bottom: 10px;
-    padding-bottom: 6px;
+    margin-bottom: 6px;
+    padding: 8px 12px 4px;
   }
 
   .app-title {
@@ -376,19 +378,43 @@
     padding: 8px;
   }
 
+  .denominations-container {
+    gap: 4px;
+    padding: 4px;
+  }
+
   .denomination-row {
-    padding: 8px 12px;
+    padding: 4px 8px;
+    gap: 4px;
+  }
+
+  .denomination-label {
+    width: 40px;
+    font-size: 13px;
   }
 
   .denomination-input,
   .denomination-count {
-    font-size: 14px;
+    width: 65px;
+    padding: 4px 8px;
+    height: 32px;
+    font-size: 15px;
+    font-weight: 700;
   }
 
-  .note-input,
-  .save-button {
-    height: 48px;
-    font-size: 18px;
+  .denomination-total {
+    padding-right: 8px;
+    font-size: 13px;
+  }
+
+  .note-input {
+    padding: 6px 12px;
+    height: 36px;
+  }
+
+  .total-amount {
+    padding: 8px 12px;
+    height: 40px;
   }
 
   /* Ensure text is readable on mobile screens */
@@ -398,11 +424,6 @@
   .entry-time,
   .date-display {
     font-size: 16px;
-  }
-
-  /* Increase spacing between groups */
-  .denominations-container {
-    gap: 8px;
   }
 
   /* Larger touch targets for buttons */
@@ -424,12 +445,6 @@
   .entry-note {
     font-size: 16px;
     max-width: 250px;
-  }
-
-  .total-amount {
-    height: 48px;
-    font-size: 20px;
-    padding: 10px 14px;
   }
 
   .total-label {
