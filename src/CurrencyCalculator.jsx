@@ -349,6 +349,11 @@ export default function CurrencyCalculator() {
       </div>
 
       <div className="denominations-container">
+        <div className="input-header">
+          <span className="header-label">Value</span>
+          <span className="header-label">Count</span>
+          <span className="header-label">Amount</span>
+        </div>
         {denominations.map(d => (
           <div key={d} className={`denomination-row ${counts[d] ? 'has-value' : 'empty-value'}`}>
             <label className="denomination-label">₹{d}</label>
@@ -359,6 +364,7 @@ export default function CurrencyCalculator() {
               onChange={(e) => handleChange(d, e.target.value)}
               className="denomination-input"
               placeholder="0"
+              aria-label={`Count of ₹${d} notes`}
             />
             <div className="denomination-total">
               {d * (counts[d] === '' ? 0 : counts[d])}
@@ -459,6 +465,11 @@ export default function CurrencyCalculator() {
       </div>
 
       <div className="denominations-container">
+        <div className="input-header">
+          <span className="header-label">Value</span>
+          <span className="header-label">Count</span>
+          <span className="header-label">Amount</span>
+        </div>
         {denominations.map(d => (
           <div key={d} className={`denomination-row ${counts[d] ? 'has-value' : 'empty-value'}`}>
             <label className="denomination-label">₹{d}</label>
