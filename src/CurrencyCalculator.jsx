@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { FiEdit2 } from "react-icons/fi";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import "./styles/calculator.css";
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
@@ -166,13 +168,10 @@ export default function CurrencyCalculator() {
       const istDateTime = getISTDateTime();
 
       if (editingEntryId) {
-        // Update existing entry
+        // Update existing entry without changing timestamp
         const { error: calcError } = await supabase
           .from("calculations")
-          .update({ 
-            note,
-            ist_timestamp: istDateTime
-          })
+          .update({ note })  // Only update the note
           .eq('id', editingEntryId);
 
         if (calcError) {
@@ -215,7 +214,7 @@ export default function CurrencyCalculator() {
           type: 'success'
         });
       } else {
-        // Create new entry
+        // Create new entry with current timestamp
         const { data: calcData, error: calcError } = await supabase
           .from("calculations")
           .insert([{ 
@@ -477,15 +476,17 @@ export default function CurrencyCalculator() {
             className="action-button edit"
             onClick={handleEdit}
             disabled={loading}
+            title="Edit"
           >
-            Edit
+            <FiEdit2 size={20} />
           </button>
           <button 
             className="action-button delete"
             onClick={handleDelete}
             disabled={loading}
+            title="Delete"
           >
-            {loading ? "..." : "Delete"}
+            {loading ? "..." : <RiDeleteBin6Line size={20} />}
           </button>
         </div>
         <div className="total-amount history-total">
