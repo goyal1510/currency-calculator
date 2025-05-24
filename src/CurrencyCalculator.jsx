@@ -32,6 +32,8 @@ export default function CurrencyCalculator() {
   const [entries, setEntries] = useState([]);
   const [entryIndex, setEntryIndex] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+  const [editingEntryId, setEditingEntryId] = useState(null);
+  const [dialog, setDialog] = useState({ show: false, message: '', type: '' });
 
   const total = Object.entries(counts).reduce((sum, [d, count]) => {
     // Handle empty string or undefined values in total calculation
@@ -163,49 +165,171 @@ export default function CurrencyCalculator() {
     try {
       const istDateTime = getISTDateTime();
 
-      const { data: calcData, error: calcError } = await supabase
-        .from("calculations")
-        .insert([{ 
-          note,
-          ist_timestamp: istDateTime
-        }])
-        .select()
-        .single();
+      if (editingEntryId) {
+        // Update existing entry
+        const { error: calcError } = await supabase
+          .from("calculations")
+          .update({ 
+            note,
+            ist_timestamp: istDateTime
+          })
+          .eq('id', editingEntryId);
 
-      if (calcError) {
-        console.error("Error saving calculation:", calcError);
-        return;
+        if (calcError) {
+          console.error("Error updating calculation:", calcError);
+          return;
+        }
+
+        // Delete existing denominations
+        const { error: deleteError } = await supabase
+          .from("denominations")
+          .delete()
+          .eq('calculation_id', editingEntryId);
+
+        if (deleteError) {
+          console.error("Error deleting old denominations:", deleteError);
+          return;
+        }
+
+        // Insert new denominations
+        const entries = denominations
+          .filter(d => counts[d] !== '')
+          .map(d => ({
+            calculation_id: editingEntryId,
+            denomination: d,
+            count: counts[d]
+          }));
+
+        const { error: denomError } = await supabase
+          .from("denominations")
+          .insert(entries);
+
+        if (denomError) {
+          console.error("Error updating denominations:", denomError);
+          return;
+        }
+
+        setDialog({
+          show: true,
+          message: "Entry updated successfully!",
+          type: 'success'
+        });
+      } else {
+        // Create new entry
+        const { data: calcData, error: calcError } = await supabase
+          .from("calculations")
+          .insert([{ 
+            note,
+            ist_timestamp: istDateTime
+          }])
+          .select()
+          .single();
+
+        if (calcError) {
+          console.error("Error saving calculation:", calcError);
+          return;
+        }
+
+        const entries = denominations
+          .filter(d => counts[d] !== '')
+          .map(d => ({
+            calculation_id: calcData.id,
+            denomination: d,
+            count: counts[d]
+          }));
+
+        const { error: denomError } = await supabase
+          .from("denominations")
+          .insert(entries);
+
+        if (denomError) {
+          console.error("Error saving denominations:", denomError);
+          return;
+        }
+
+        setDialog({
+          show: true,
+          message: "Entry saved successfully!",
+          type: 'success'
+        });
       }
 
-      const entries = denominations
-        .filter(d => counts[d] !== '')
-        .map(d => ({
-          calculation_id: calcData.id,
-          denomination: d,
-          count: counts[d]
-        }));
-
-      const { error: denomError } = await supabase
-        .from("denominations")
-        .insert(entries);
-
-      if (denomError) {
-        console.error("Error saving denominations:", denomError);
-        return;
-      }
-
-      alert("Calculation saved!");
+      // Reset form
       setCounts(Object.fromEntries(denominations.map(d => [d, ''])));
       setNote("");
+      setEditingEntryId(null);
       
       if (showHistory) {
         fetchDates();
       }
     } catch (err) {
       console.error("Unexpected error in handleSave:", err);
+      setDialog({
+        show: true,
+        message: "An error occurred while saving.",
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = () => {
+    if (entries[entryIndex]?.id) {
+      setEditingEntryId(entries[entryIndex].id);
+      if (entries[entryIndex]?.note) {
+        setNote(entries[entryIndex].note);
+      }
+      setShowHistory(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!entries[entryIndex]?.id) return;
+    
+    setDialog({
+      show: true,
+      message: "Are you sure you want to delete this entry?",
+      type: 'confirm',
+      onConfirm: async () => {
+        setLoading(true);
+        try {
+          const { error: denomError } = await supabase
+            .from("denominations")
+            .delete()
+            .eq("calculation_id", entries[entryIndex].id);
+
+          if (denomError) {
+            console.error("Error deleting denominations:", denomError);
+            return;
+          }
+
+          const { error: calcError } = await supabase
+            .from("calculations")
+            .delete()
+            .eq("id", entries[entryIndex].id);
+
+          if (calcError) {
+            console.error("Error deleting calculation:", calcError);
+            return;
+          }
+
+          setDialog({
+            show: true,
+            message: "Entry deleted successfully!",
+            type: 'success',
+            onClose: () => {
+              setDialog({ show: false, message: '', type: '' });
+              fetchDates();
+            }
+          });
+        } catch (err) {
+          console.error("Unexpected error in handleDelete:", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   const renderCalculator = () => (
@@ -214,7 +338,12 @@ export default function CurrencyCalculator() {
         <div className="app-title">Cash Counter</div>
         <button 
           className="history-button"
-          onClick={() => setShowHistory(true)}
+          onClick={() => {
+            setShowHistory(true);
+            setEditingEntryId(null);
+            setCounts(Object.fromEntries(denominations.map(d => [d, ''])));
+            setNote("");
+          }}
         >
           History
         </button>
@@ -342,18 +471,80 @@ export default function CurrencyCalculator() {
         ))}
       </div>
 
-      <div className="total-amount history-total">
-        <span className="total-label">Total:</span>
-        <span className="total-value">₹{total}</span>
+      <div className="total-container">
+        <div className="history-actions">
+          <button 
+            className="action-button edit"
+            onClick={handleEdit}
+            disabled={loading}
+          >
+            Edit
+          </button>
+          <button 
+            className="action-button delete"
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            {loading ? "..." : "Delete"}
+          </button>
+        </div>
+        <div className="total-amount history-total">
+          <span className="total-label">Total:</span>
+          <span className="total-value">₹{total}</span>
+        </div>
       </div>
     </div>
   );
+
+  const Dialog = () => {
+    if (!dialog.show) return null;
+
+    return (
+      <div className="dialog-overlay">
+        <div className="dialog">
+          <div className={`dialog-content ${dialog.type}`}>
+            <p>{dialog.message}</p>
+            {dialog.type === 'confirm' ? (
+              <div className="dialog-actions">
+                <button 
+                  onClick={() => {
+                    dialog.onConfirm?.();
+                    setDialog({ show: false, message: '', type: '' });
+                  }}
+                  className="confirm-button"
+                >
+                  Confirm
+                </button>
+                <button 
+                  onClick={() => setDialog({ show: false, message: '', type: '' })}
+                  className="cancel-button"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => {
+                  dialog.onClose?.();
+                  setDialog({ show: false, message: '', type: '' });
+                }}
+                className="ok-button"
+              >
+                OK
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="calculator-container">
       <div className="calculator-wrapper">
         {showHistory ? renderHistory() : renderCalculator()}
       </div>
+      <Dialog />
     </div>
   );
 }
