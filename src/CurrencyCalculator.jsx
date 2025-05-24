@@ -26,7 +26,7 @@ const getISTDateTime = () => {
 };
 
 export default function CurrencyCalculator() {
-  const [counts, setCounts] = useState(Object.fromEntries(denominations.map(d => [d, ''])));
+  const [counts, setCounts] = useState(Object.fromEntries(denominations.map(d => [d, { bundle: '', open: '', total: 0 }])));
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [dates, setDates] = useState([]);
@@ -38,9 +38,7 @@ export default function CurrencyCalculator() {
   const [dialog, setDialog] = useState({ show: false, message: '', type: '' });
 
   const total = Object.entries(counts).reduce((sum, [d, count]) => {
-    // Handle empty string or undefined values in total calculation
-    const numCount = count === '' ? 0 : parseInt(count || 0);
-    return sum + d * numCount;
+    return sum + d * count.total;
   }, 0);
 
   useEffect(() => {
@@ -62,7 +60,7 @@ export default function CurrencyCalculator() {
     if (entries.length > 0 && entryIndex >= 0 && entries[entryIndex]?.id) {
       fetchEntry(entries[entryIndex].id);
     } else {
-      setCounts(Object.fromEntries(denominations.map(d => [d, ''])));
+      setCounts(Object.fromEntries(denominations.map(d => [d, { bundle: '', open: '', total: 0 }])));
     }
   }, [entryIndex, entries]);
 
@@ -134,7 +132,7 @@ export default function CurrencyCalculator() {
     try {
       const { data, error } = await supabase
         .from("denominations")
-        .select("denomination, count")
+        .select("denomination, count, bundle_count, open_count")
         .eq("calculation_id", id);
       
       if (error) {
@@ -142,11 +140,18 @@ export default function CurrencyCalculator() {
         return;
       }
 
-      const newCounts = Object.fromEntries(denominations.map(d => [d, '']));
+      const newCounts = Object.fromEntries(
+        denominations.map(d => [d, { bundle: '', open: '', total: 0 }])
+      );
+
       if (data) {
-        data.forEach(({ denomination, count }) => {
+        data.forEach(({ denomination, count, bundle_count, open_count }) => {
           if (denomination in newCounts) {
-            newCounts[denomination] = count;
+            newCounts[denomination] = {
+              bundle: bundle_count || '',
+              open: open_count || '',
+              total: count || 0
+            };
           }
         });
       }
@@ -156,10 +161,24 @@ export default function CurrencyCalculator() {
     }
   };
 
-  const handleChange = (denomination, value) => {
-    // Allow empty string or valid numbers
+  const handleChange = (denomination, type, value) => {
     const newValue = value === '' ? '' : parseInt(value || 0);
-    setCounts({ ...counts, [denomination]: newValue });
+    setCounts(prev => {
+      const prevCount = prev[denomination];
+      const bundle = type === 'bundle' ? newValue : prevCount.bundle;
+      const open = type === 'open' ? newValue : prevCount.open;
+      const bundleValue = bundle === '' ? 0 : bundle * 100;
+      const openValue = open === '' ? 0 : open;
+      
+      return {
+        ...prev,
+        [denomination]: {
+          bundle: type === 'bundle' ? value : prevCount.bundle,
+          open: type === 'open' ? value : prevCount.open,
+          total: bundleValue + openValue
+        }
+      };
+    });
   };
 
   const handleSave = async () => {
@@ -171,7 +190,7 @@ export default function CurrencyCalculator() {
         // Update existing entry without changing timestamp
         const { error: calcError } = await supabase
           .from("calculations")
-          .update({ note })  // Only update the note
+          .update({ note })
           .eq('id', editingEntryId);
 
         if (calcError) {
@@ -192,11 +211,13 @@ export default function CurrencyCalculator() {
 
         // Insert new denominations
         const entries = denominations
-          .filter(d => counts[d] !== '')
+          .filter(d => counts[d].total > 0)
           .map(d => ({
             calculation_id: editingEntryId,
             denomination: d,
-            count: counts[d]
+            count: counts[d].total,
+            bundle_count: counts[d].bundle === '' ? 0 : counts[d].bundle,
+            open_count: counts[d].open === '' ? 0 : counts[d].open
           }));
 
         const { error: denomError } = await supabase
@@ -230,11 +251,13 @@ export default function CurrencyCalculator() {
         }
 
         const entries = denominations
-          .filter(d => counts[d] !== '')
+          .filter(d => counts[d].total > 0)
           .map(d => ({
             calculation_id: calcData.id,
             denomination: d,
-            count: counts[d]
+            count: counts[d].total,
+            bundle_count: counts[d].bundle === '' ? 0 : counts[d].bundle,
+            open_count: counts[d].open === '' ? 0 : counts[d].open
           }));
 
         const { error: denomError } = await supabase
@@ -254,7 +277,7 @@ export default function CurrencyCalculator() {
       }
 
       // Reset form
-      setCounts(Object.fromEntries(denominations.map(d => [d, ''])));
+      setCounts(Object.fromEntries(denominations.map(d => [d, { bundle: '', open: '', total: 0 }])));
       setNote("");
       setEditingEntryId(null);
       
@@ -340,7 +363,7 @@ export default function CurrencyCalculator() {
           onClick={() => {
             setShowHistory(true);
             setEditingEntryId(null);
-            setCounts(Object.fromEntries(denominations.map(d => [d, ''])));
+            setCounts(Object.fromEntries(denominations.map(d => [d, { bundle: '', open: '', total: 0 }])));
             setNote("");
           }}
         >
@@ -351,23 +374,35 @@ export default function CurrencyCalculator() {
       <div className="denominations-container">
         <div className="input-header">
           <span className="header-label">Value</span>
+          <span className="header-label">Bundle</span>
+          <span className="header-label">Open</span>
           <span className="header-label">Count</span>
           <span className="header-label">Amount</span>
         </div>
         {denominations.map(d => (
-          <div key={d} className={`denomination-row ${counts[d] ? 'has-value' : 'empty-value'}`}>
+          <div key={d} className={`denomination-row ${counts[d].total > 0 ? 'has-value' : 'empty-value'}`}>
             <label className="denomination-label">₹{d}</label>
             <input
               type="number"
-              value={counts[d]}
+              value={counts[d].bundle}
               min="0"
-              onChange={(e) => handleChange(d, e.target.value)}
+              onChange={(e) => handleChange(d, 'bundle', e.target.value)}
               className="denomination-input"
               placeholder="0"
-              aria-label={`Count of ₹${d} notes`}
+              aria-label={`Bundle of ₹${d} notes`}
             />
+            <input
+              type="number"
+              value={counts[d].open}
+              min="0"
+              onChange={(e) => handleChange(d, 'open', e.target.value)}
+              className="denomination-input"
+              placeholder="0"
+              aria-label={`Open ₹${d} notes`}
+            />
+            <div className="denomination-count">{counts[d].total}</div>
             <div className="denomination-total">
-              {d * (counts[d] === '' ? 0 : counts[d])}
+              {d * counts[d].total}
             </div>
           </div>
         ))}
@@ -407,7 +442,7 @@ export default function CurrencyCalculator() {
           className="history-button"
           onClick={() => {
             setShowHistory(false);
-            setCounts(Object.fromEntries(denominations.map(d => [d, ''])));
+            setCounts(Object.fromEntries(denominations.map(d => [d, { bundle: '', open: '', total: 0 }])));
             setNote("");
           }}
         >
@@ -467,15 +502,19 @@ export default function CurrencyCalculator() {
       <div className="denominations-container">
         <div className="input-header">
           <span className="header-label">Value</span>
+          <span className="header-label">Bundle</span>
+          <span className="header-label">Open</span>
           <span className="header-label">Count</span>
           <span className="header-label">Amount</span>
         </div>
         {denominations.map(d => (
-          <div key={d} className={`denomination-row ${counts[d] ? 'has-value' : 'empty-value'}`}>
+          <div key={d} className={`denomination-row ${counts[d].total > 0 ? 'has-value' : 'empty-value'}`}>
             <label className="denomination-label">₹{d}</label>
-            <div className="denomination-count">{counts[d]}</div>
+            <div className="denomination-count">{counts[d].bundle || 0}</div>
+            <div className="denomination-count">{counts[d].open || 0}</div>
+            <div className="denomination-count">{counts[d].total}</div>
             <div className="denomination-total">
-              {d * (counts[d] === '' ? 0 : counts[d])}
+              {d * counts[d].total}
             </div>
           </div>
         ))}
