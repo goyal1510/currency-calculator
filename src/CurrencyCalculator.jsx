@@ -233,7 +233,7 @@ export default function CurrencyCalculator() {
               placeholder="0"
             />
             <div className="denomination-total">
-              ₹{d * (counts[d] === '' ? 0 : counts[d])}
+              {d * (counts[d] === '' ? 0 : counts[d])}
             </div>
           </div>
         ))}
@@ -336,7 +336,7 @@ export default function CurrencyCalculator() {
             <label className="denomination-label">₹{d}</label>
             <div className="denomination-count">{counts[d]}</div>
             <div className="denomination-total">
-              ₹{d * (counts[d] === '' ? 0 : counts[d])}
+              {d * (counts[d] === '' ? 0 : counts[d])}
             </div>
           </div>
         ))}
